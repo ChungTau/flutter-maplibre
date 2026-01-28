@@ -15,12 +15,61 @@ import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 import org.maplibre.android.location.permissions.PermissionsManager
+import org.maplibre.android.maps.MapView
+import java.util.concurrent.ConcurrentHashMap
 
 /** MapLibrePlugin */
 class MapLibrePlugin :
     FlutterPlugin,
     ActivityAware,
     PluginRegistry.RequestPermissionsResultListener {
+
+    companion object {
+        // ========== Rooty Fork Addition: Static MapView Registry ==========
+        // Thread-safe registry for cross-plugin access
+        // Required for rooty_map_engine Phase 1.2 Native Matrix Sync
+        private val mapViewRegistry = ConcurrentHashMap<Int, MapView>()
+
+        /**
+         * Register a MapView instance for cross-plugin access
+         *
+         * @param id Unique identifier (typically System.identityHashCode(mapView))
+         * @param view The MapView instance to register
+         */
+        @JvmStatic
+        fun registerMapView(id: Int, view: MapView) {
+            mapViewRegistry[id] = view
+            android.util.Log.d("MapLibrePlugin", "[Rooty] Registered MapView with ID: $id")
+        }
+
+        /**
+         * Retrieve a registered MapView by ID
+         *
+         * @param id The MapView identifier
+         * @return The MapView instance, or null if not found
+         */
+        @JvmStatic
+        fun getMapView(id: Int): MapView? {
+            val view = mapViewRegistry[id]
+            if (view == null) {
+                android.util.Log.w("MapLibrePlugin", "[Rooty] MapView not found for ID: $id")
+            }
+            return view
+        }
+
+        /**
+         * Unregister a MapView instance
+         *
+         * @param id The MapView identifier
+         */
+        @JvmStatic
+        fun unregisterMapView(id: Int) {
+            mapViewRegistry.remove(id)
+            android.util.Log.d("MapLibrePlugin", "[Rooty] Unregistered MapView with ID: $id")
+        }
+        // ========== End Rooty Fork Addition ==========
+    }
+
     private var permissionsManager: PermissionsManager? = null
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
