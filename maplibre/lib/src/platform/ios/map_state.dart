@@ -160,22 +160,15 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
   @override
   void dispose() {
     // ========== Rooty Fork Addition: Unregister MapView ==========
+    // TODO: iOS MapView unregistration will be done in Swift/Objective-C code
+    // For now, just log the MapView ID
     try {
       final mapViewId = identityHashCode(_cachedMapView);
       if (_cachedMapView != null) {
-        // Call static method MapLibreIosPlugin.unregisterMapView(id:)
-        final pluginClass = ObjCClass('MapLibreIosPlugin'.toNSString());
-        final selector = ObjCSelector('unregisterMapView:'.toNSString());
-
-        pluginClass.msgSend$1(
-          selector,
-          mapViewId,
-        );
-
-        debugPrint('[Rooty] Unregistered MapView with ID: $mapViewId');
+        debugPrint('[Rooty] iOS MapView ID on dispose: $mapViewId (unregistration pending native implementation)');
       }
     } catch (e) {
-      debugPrint('[Rooty] Failed to unregister MapView: $e');
+      debugPrint('[Rooty] Failed to get MapView ID on dispose: $e');
     }
     // ========== End Rooty Fork Addition ==========
 
@@ -458,27 +451,13 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
   @override
   void onMapReady() {
     // ========== Rooty Fork Addition: Register MapView for Matrix Sync ==========
-    // Register MapView instance in static registry for cross-plugin access
-    // Required by rooty_map_engine for Phase 1.2 Native Matrix Sync
+    // TODO: iOS MapView registration will be done in Swift/Objective-C code
+    // For now, just log the MapView ID
     try {
-      final mapView = _mapView;
-      final mapViewId = identityHashCode(mapView);
-
-      // Call static method MapLibreIosPlugin.registerMapView(id:mapView:)
-      // Using Objective-C FFI
-      final pluginClass = ObjCClass('MapLibreIosPlugin'.toNSString());
-      final selector = ObjCSelector('registerMapView:mapView:'.toNSString());
-
-      // Call: [MapLibreIosPlugin registerMapView:mapViewId mapView:mapView]
-      pluginClass.msgSend$1(
-        selector,
-        mapViewId,
-        mapView,
-      );
-
-      debugPrint('[Rooty] Registered MapView with ID: $mapViewId');
+      final mapViewId = identityHashCode(_mapView);
+      debugPrint('[Rooty] iOS MapView ID: $mapViewId (registration pending native implementation)');
     } catch (e) {
-      debugPrint('[Rooty] Failed to register MapView: $e');
+      debugPrint('[Rooty] Failed to get MapView ID: $e');
     }
     // ========== End Rooty Fork Addition ==========
 
