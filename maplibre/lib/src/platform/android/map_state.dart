@@ -253,23 +253,22 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
         final mapViewId = mapView.hashCode;
 
         // Call MapLibrePlugin.registerMapView(id, view) via JNI
-        final pluginClass = jni.JClass.forName(
-          'com/github/josxha/maplibre/MapLibrePlugin',
-        )..releasedBy(arena);
+        using((arena) {
+          final pluginClass = JClass.forName(
+            'com/github/josxha/maplibre/MapLibrePlugin',
+          )..releasedBy(arena);
 
-        final registerMethod = pluginClass.staticMethodId(
-          'registerMapView',
-          '(ILorg/maplibre/android/maps/MapView;)V',
-        );
+          final registerMethod = pluginClass.staticMethodId(
+            'registerMapView',
+            '(ILorg/maplibre/android/maps/MapView;)V',
+          );
 
-        jni.Jni.env.callStaticVoidMethodA(
-          pluginClass.reference.pointer,
-          registerMethod,
-          jni.JValueArgs([
-            jni.JValueInt(mapViewId),
-            mapView.reference.pointer,
-          ]).toPointer(),
-        );
+          // Call static void method with arguments using jni 0.15.x API
+          registerMethod.call(pluginClass, jni.JObject.type, [
+            mapViewId,
+            mapView,
+          ]);
+        });
 
         debugPrint('[Rooty] Registered MapView with ID: $mapViewId');
       }
@@ -316,7 +315,7 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
           final mapViewId = mapView.hashCode;
 
           // Call MapLibrePlugin.unregisterMapView(id) via JNI
-          final pluginClass = jni.JClass.forName(
+          final pluginClass = JClass.forName(
             'com/github/josxha/maplibre/MapLibrePlugin',
           )..releasedBy(arena);
 
@@ -325,11 +324,8 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
             '(I)V',
           );
 
-          jni.Jni.env.callStaticVoidMethodA(
-            pluginClass.reference.pointer,
-            unregisterMethod,
-            jni.JValueArgs([jni.JValueInt(mapViewId)]).toPointer(),
-          );
+          // Call static void method with arguments using jni 0.15.x API
+          unregisterMethod.call(pluginClass, jni.JObject.type, [mapViewId]);
 
           debugPrint('[Rooty] Unregistered MapView with ID: $mapViewId');
         }
