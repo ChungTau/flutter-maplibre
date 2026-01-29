@@ -251,7 +251,7 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
       final mapViewId = _mapView?.hashCode ?? 0;
       if (_mapView != null && mapViewId != 0) {
         // Call static registry method via JNI reflection
-        final pluginClass = jni.JClass.forName(
+        final pluginClass = JClass.forName(
           r'com/github/josxha/maplibre/MapLibrePlugin',
         )..releasedBy(arena);
 
@@ -260,12 +260,12 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
           r'(ILorg/maplibre/android/maps/MapView;)V',
         );
 
-        jni.Jni.env.CallStaticVoidMethodA(
+        Jni.env.CallStaticVoidMethodA(
           pluginClass.reference.pointer,
           registerMethod,
-          jni.JValueArgs([
-            jni.JValueInt(mapViewId),
-            jni.JValueObj(_mapView!.reference.pointer),
+          JValueArgs([
+            JValueInt(mapViewId),
+            JValueObj(_mapView!.reference.pointer),
           ]..releasedBy(arena)).toPointer(),
         );
 
@@ -311,7 +311,7 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
       final mapViewId = _mapView?.hashCode ?? 0;
       if (mapViewId != 0) {
         using((arena) {
-          final pluginClass = jni.JClass.forName(
+          final pluginClass = JClass.forName(
             r'com/github/josxha/maplibre/MapLibrePlugin',
           )..releasedBy(arena);
 
@@ -320,11 +320,11 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
             r'(I)V',
           );
 
-          jni.Jni.env.CallStaticVoidMethodA(
+          Jni.env.CallStaticVoidMethodA(
             pluginClass.reference.pointer,
             unregisterMethod,
-            jni.JValueArgs([
-              jni.JValueInt(mapViewId),
+            JValueArgs([
+              JValueInt(mapViewId),
             ]..releasedBy(arena)).toPointer(),
           );
 
