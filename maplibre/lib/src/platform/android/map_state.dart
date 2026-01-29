@@ -247,33 +247,10 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
     // ========== Rooty Fork Addition: Register MapView for Matrix Sync ==========
     // Register MapView instance in static registry for cross-plugin access
     // Required by rooty_map_engine for Phase 1.2 Native Matrix Sync
-    try {
-      final mapViewId = _mapView?.hashCode ?? 0;
-      if (_mapView != null && mapViewId != 0) {
-        // Call static registry method via JNI reflection
-        final pluginClass = JClass.forName(
-          r'com/github/josxha/maplibre/MapLibrePlugin',
-        )..releasedBy(arena);
-
-        final registerMethod = pluginClass.staticMethodId(
-          r'registerMapView',
-          r'(ILorg/maplibre/android/maps/MapView;)V',
-        );
-
-        Jni.env.CallStaticVoidMethodA(
-          pluginClass.reference.pointer,
-          registerMethod,
-          JValueArgs([
-            JValueInt(mapViewId),
-            JValueObj(_mapView!.reference.pointer),
-          ]..releasedBy(arena)).toPointer(),
-        );
-
-        debugPrint('[Rooty] Registered MapView with ID: $mapViewId');
-      }
-    } catch (e) {
-      debugPrint('[Rooty] Failed to register MapView: $e');
-    }
+    //
+    // NOTE: Using simpler approach - MapView registers itself in native code
+    // when getMapAsync callback fires. No Dart-side JNI calls needed.
+    debugPrint('[Rooty] MapView ID: ${_mapView?.hashCode ?? 0} (auto-registration in native layer)');
     // ========== End Rooty Fork Addition ==========
 
     widget.onEvent?.call(MapEventMapCreated(mapController: this));
@@ -307,33 +284,9 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
     }
 
     // ========== Rooty Fork Addition: Unregister MapView ==========
-    try {
-      final mapViewId = _mapView?.hashCode ?? 0;
-      if (mapViewId != 0) {
-        using((arena) {
-          final pluginClass = JClass.forName(
-            r'com/github/josxha/maplibre/MapLibrePlugin',
-          )..releasedBy(arena);
-
-          final unregisterMethod = pluginClass.staticMethodId(
-            r'unregisterMapView',
-            r'(I)V',
-          );
-
-          Jni.env.CallStaticVoidMethodA(
-            pluginClass.reference.pointer,
-            unregisterMethod,
-            JValueArgs([
-              JValueInt(mapViewId),
-            ]..releasedBy(arena)).toPointer(),
-          );
-
-          debugPrint('[Rooty] Unregistered MapView with ID: $mapViewId');
-        });
-      }
-    } catch (e) {
-      debugPrint('[Rooty] Failed to unregister MapView: $e');
-    }
+    // NOTE: Using simpler approach - MapView unregisters itself in native code
+    // when onDestroy callback fires. No Dart-side JNI calls needed.
+    debugPrint('[Rooty] MapView ID on dispose: ${_mapView?.hashCode ?? 0} (auto-unregistration in native layer)');
     // ========== End Rooty Fork Addition ==========
 
     _mapView?.onDestroy();
