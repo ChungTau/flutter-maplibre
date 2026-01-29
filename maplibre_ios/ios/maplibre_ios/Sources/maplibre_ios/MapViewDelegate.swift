@@ -62,6 +62,15 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
                 }
 
                 MapLibreRegistry.addMap(viewId: viewId, map: self._mapView)
+
+                // ========== Rooty Fork Addition: Register MapView for Matrix Sync ==========
+                // Register MapView in MapLibreIosPlugin's static registry
+                // Required for rooty_map_engine Phase 1.2 Native Matrix Sync
+                let mapViewId = ObjectIdentifier(self._mapView).hashValue
+                MapLibreIosPlugin.registerMapView(id: mapViewId, mapView: self._mapView)
+                NSLog("[Rooty] MapViewDelegate: Registered MapView with ID: \(mapViewId) for viewId: \(viewId)")
+                // ========== End Rooty Fork Addition ==========
+
                 self._mapView.autoresizingMask = [
                     .flexibleWidth, .flexibleHeight,
                 ]
@@ -187,6 +196,17 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
     func view() -> UIView {
         _view
     }
+
+    // ========== Rooty Fork Addition: Cleanup MapView Registry ==========
+    deinit {
+        // Unregister MapView from MapLibreIosPlugin's static registry
+        if let mapView = _mapView {
+            let mapViewId = ObjectIdentifier(mapView).hashValue
+            MapLibreIosPlugin.unregisterMapView(id: mapViewId)
+            NSLog("[Rooty] MapViewDelegate: Unregistered MapView with ID: \(mapViewId)")
+        }
+    }
+    // ========== End Rooty Fork Addition ==========
 
     func gestureRecognizer(
         _: UIGestureRecognizer,
