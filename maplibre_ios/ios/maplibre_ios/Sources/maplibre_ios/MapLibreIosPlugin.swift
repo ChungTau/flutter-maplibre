@@ -2,6 +2,7 @@ import Flutter
 import MapLibre
 import UIKit
 
+@objc(MapLibreIosPlugin)
 public class MapLibreIosPlugin: NSObject, FlutterPlugin {
     // ========== Rooty Fork Addition: Static MapView Registry ==========
     // Thread-safe weak reference registry for cross-plugin access
