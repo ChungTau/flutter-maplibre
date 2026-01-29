@@ -64,11 +64,10 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
                 MapLibreRegistry.addMap(viewId: viewId, map: self._mapView)
 
                 // ========== Rooty Fork Addition: Register MapView for Matrix Sync ==========
-                // Register MapView in MapLibreIosPlugin's static registry
+                // Register MapView using viewId as the key (matches Dart side)
                 // Required for rooty_map_engine Phase 1.2 Native Matrix Sync
-                let mapViewId = ObjectIdentifier(self._mapView).hashValue
-                MapLibreIosPlugin.registerMapView(id: mapViewId, mapView: self._mapView)
-                NSLog("[Rooty] MapViewDelegate: Registered MapView with ID: \(mapViewId) for viewId: \(viewId)")
+                MapLibreIosPlugin.registerMapView(id: Int(viewId), mapView: self._mapView)
+                NSLog("[Rooty] MapViewDelegate: Registered MapView for viewId: \(viewId)")
                 // ========== End Rooty Fork Addition ==========
 
                 self._mapView.autoresizingMask = [
@@ -200,11 +199,8 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
     // ========== Rooty Fork Addition: Cleanup MapView Registry ==========
     deinit {
         // Unregister MapView from MapLibreIosPlugin's static registry
-        if let mapView = _mapView {
-            let mapViewId = ObjectIdentifier(mapView).hashValue
-            MapLibreIosPlugin.unregisterMapView(id: mapViewId)
-            NSLog("[Rooty] MapViewDelegate: Unregistered MapView with ID: \(mapViewId)")
-        }
+        MapLibreIosPlugin.unregisterMapView(id: Int(viewId))
+        NSLog("[Rooty] MapViewDelegate: Unregistered MapView for viewId: \(viewId)")
     }
     // ========== End Rooty Fork Addition ==========
 

@@ -48,27 +48,13 @@ public class MapLibreIosPlugin: NSObject, FlutterPlugin {
 
     /// Unregister a MapView instance
     ///
-    /// - Parameter id: The MapView identifier
+    /// - Parameter id: The MapView identifier (viewId)
     @objc public static func unregisterMapView(id: Int) {
         registryLock.lock()
         defer { registryLock.unlock() }
 
         mapViewRegistry.removeValue(forKey: id)
-        NSLog("[Rooty] MapLibreIosPlugin: Unregistered MapView with ID: \(id)")
-    }
-
-    /// Get ObjectIdentifier hash for MapView registered with given viewId
-    ///
-    /// - Parameter viewId: The Flutter platform view ID
-    /// - Returns: ObjectIdentifier hash code, or 0 if not found
-    @objc public static func getMapViewIdForViewId(viewId: Int64) -> Int {
-        guard let mapView = MapLibreRegistry.getMap(viewId: viewId) as? MLNMapView else {
-            NSLog("[Rooty] MapLibreIosPlugin: No MapView found for viewId: \(viewId)")
-            return 0
-        }
-        let mapViewId = ObjectIdentifier(mapView).hashValue
-        NSLog("[Rooty] MapLibreIosPlugin: ViewId \(viewId) -> MapViewId \(mapViewId)")
-        return mapViewId
+        NSLog("[Rooty] MapLibreIosPlugin: Unregisterered MapView for viewId: \(id)")
     }
     // ========== End Rooty Fork Addition ==========
 
