@@ -153,6 +153,26 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
 
   @override
   void dispose() {
+    // ========== Rooty Fork Addition: Unregister MapView ==========
+    try {
+      final mapViewId = identityHashCode(_cachedMapView);
+      if (_cachedMapView != null) {
+        // Call static method MapLibreIosPlugin.unregisterMapView(id:)
+        final pluginClass = ObjCClass('MapLibreIosPlugin'.toNSString());
+        final selector = ObjCSelector('unregisterMapView:'.toNSString());
+
+        pluginClass.msgSend$1(
+          selector,
+          mapViewId,
+        );
+
+        debugPrint('[Rooty] Unregistered MapView with ID: $mapViewId');
+      }
+    } catch (e) {
+      debugPrint('[Rooty] Failed to unregister MapView: $e');
+    }
+    // ========== End Rooty Fork Addition ==========
+
     style?.dispose();
     super.dispose();
   }
@@ -431,6 +451,31 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
 
   @override
   void onMapReady() {
+    // ========== Rooty Fork Addition: Register MapView for Matrix Sync ==========
+    // Register MapView instance in static registry for cross-plugin access
+    // Required by rooty_map_engine for Phase 1.2 Native Matrix Sync
+    try {
+      final mapView = _mapView;
+      final mapViewId = identityHashCode(mapView);
+
+      // Call static method MapLibreIosPlugin.registerMapView(id:mapView:)
+      // Using Objective-C FFI
+      final pluginClass = ObjCClass('MapLibreIosPlugin'.toNSString());
+      final selector = ObjCSelector('registerMapView:mapView:'.toNSString());
+
+      // Call: [MapLibreIosPlugin registerMapView:mapViewId mapView:mapView]
+      pluginClass.msgSend$1(
+        selector,
+        mapViewId,
+        mapView,
+      );
+
+      debugPrint('[Rooty] Registered MapView with ID: $mapViewId');
+    } catch (e) {
+      debugPrint('[Rooty] Failed to register MapView: $e');
+    }
+    // ========== End Rooty Fork Addition ==========
+
     widget.onEvent?.call(MapEventMapCreated(mapController: this));
     widget.onMapCreated?.call(this);
     setState(() {

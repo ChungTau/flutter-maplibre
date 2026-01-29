@@ -243,6 +243,39 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
         options.maxBounds?.toJLatLngBounds(arena: arena),
       );
     setStyle(options.initStyle);
+
+    // ========== Rooty Fork Addition: Register MapView for Matrix Sync ==========
+    // Register MapView instance in static registry for cross-plugin access
+    // Required by rooty_map_engine for Phase 1.2 Native Matrix Sync
+    try {
+      final mapViewId = _mapView?.hashCode ?? 0;
+      if (_mapView != null && mapViewId != 0) {
+        // Call static registry method via JNI reflection
+        final pluginClass = jni.JClass.forName(
+          r'com/github/josxha/maplibre/MapLibrePlugin',
+        )..releasedBy(arena);
+
+        final registerMethod = pluginClass.staticMethodId(
+          r'registerMapView',
+          r'(ILorg/maplibre/android/maps/MapView;)V',
+        );
+
+        jni.Jni.env.CallStaticVoidMethodA(
+          pluginClass.reference.pointer,
+          registerMethod,
+          jni.JValueArgs([
+            jni.JValueInt(mapViewId),
+            jni.JValueObj(_mapView!.reference.pointer),
+          ]..releasedBy(arena)).toPointer(),
+        );
+
+        debugPrint('[Rooty] Registered MapView with ID: $mapViewId');
+      }
+    } catch (e) {
+      debugPrint('[Rooty] Failed to register MapView: $e');
+    }
+    // ========== End Rooty Fork Addition ==========
+
     widget.onEvent?.call(MapEventMapCreated(mapController: this));
     widget.onMapCreated?.call(this);
     setState(() {
@@ -272,6 +305,37 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
       _mapView?.onStop();
       _mapViewStarted = false;
     }
+
+    // ========== Rooty Fork Addition: Unregister MapView ==========
+    try {
+      final mapViewId = _mapView?.hashCode ?? 0;
+      if (mapViewId != 0) {
+        using((arena) {
+          final pluginClass = jni.JClass.forName(
+            r'com/github/josxha/maplibre/MapLibrePlugin',
+          )..releasedBy(arena);
+
+          final unregisterMethod = pluginClass.staticMethodId(
+            r'unregisterMapView',
+            r'(I)V',
+          );
+
+          jni.Jni.env.CallStaticVoidMethodA(
+            pluginClass.reference.pointer,
+            unregisterMethod,
+            jni.JValueArgs([
+              jni.JValueInt(mapViewId),
+            ]..releasedBy(arena)).toPointer(),
+          );
+
+          debugPrint('[Rooty] Unregistered MapView with ID: $mapViewId');
+        });
+      }
+    } catch (e) {
+      debugPrint('[Rooty] Failed to unregister MapView: $e');
+    }
+    // ========== End Rooty Fork Addition ==========
+
     _mapView?.onDestroy();
     _jMap?.release();
     _cachedJProjection?.release();
