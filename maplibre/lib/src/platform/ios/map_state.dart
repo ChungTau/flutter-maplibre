@@ -123,8 +123,20 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
 
   @override
   int? getMapViewId() {
-    // Return MapView's identity hash code for Matrix Sync integration
-    return identityHashCode(_cachedMapView);
+    // Call native iOS method to get ObjectIdentifier hash
+    // This must match the hash used in Swift's ObjectIdentifier(mapView).hashValue
+    try {
+      final result = MapLibreIosPlugin.getMapViewIdForViewId(_viewId);
+      if (result == 0) {
+        debugPrint('[Rooty] getMapViewId: Native method returned 0, MapView not registered yet');
+        return null;
+      }
+      debugPrint('[Rooty] getMapViewId: Got MapView ID $result for viewId $_viewId');
+      return result;
+    } catch (e) {
+      debugPrint('[Rooty] getMapViewId: Error calling native method: $e');
+      return null;
+    }
   }
 
   @override
