@@ -16,6 +16,7 @@ import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.MapLibreMap
 import java.util.concurrent.ConcurrentHashMap
 
 /** MapLibrePlugin */
@@ -25,21 +26,24 @@ class MapLibrePlugin :
     PluginRegistry.RequestPermissionsResultListener {
 
     companion object {
-        // ========== Rooty Fork Addition: Static MapView Registry ==========
+        // ========== Rooty Fork Addition: Static MapView and MapLibreMap Registry ==========
         // Thread-safe registry for cross-plugin access
         // Required for rooty_map_engine Phase 1.2 Native Matrix Sync
         private val mapViewRegistry = ConcurrentHashMap<Int, MapView>()
+        private val mapLibreMapRegistry = ConcurrentHashMap<Int, MapLibreMap>()
 
         /**
-         * Register a MapView instance for cross-plugin access
+         * Register MapView and MapLibreMap instances for cross-plugin access
          *
-         * @param id Unique identifier (typically System.identityHashCode(mapView))
+         * @param id Unique identifier (typically hashCode of MapView)
          * @param view The MapView instance to register
+         * @param map The MapLibreMap instance to register
          */
         @JvmStatic
-        fun registerMapView(id: Int, view: MapView) {
+        fun registerMapView(id: Int, view: MapView, map: MapLibreMap) {
             mapViewRegistry[id] = view
-            android.util.Log.d("MapLibrePlugin", "[Rooty] Registered MapView with ID: $id")
+            mapLibreMapRegistry[id] = map
+            android.util.Log.d("MapLibrePlugin", "[Rooty] Registered MapView and MapLibreMap with ID: $id")
         }
 
         /**
@@ -58,14 +62,30 @@ class MapLibrePlugin :
         }
 
         /**
-         * Unregister a MapView instance
+         * Retrieve a registered MapLibreMap by ID
+         *
+         * @param id The MapView identifier (same ID used for registration)
+         * @return The MapLibreMap instance, or null if not found
+         */
+        @JvmStatic
+        fun getMapLibreMap(id: Int): MapLibreMap? {
+            val map = mapLibreMapRegistry[id]
+            if (map == null) {
+                android.util.Log.w("MapLibrePlugin", "[Rooty] MapLibreMap not found for ID: $id")
+            }
+            return map
+        }
+
+        /**
+         * Unregister MapView and MapLibreMap instances
          *
          * @param id The MapView identifier
          */
         @JvmStatic
         fun unregisterMapView(id: Int) {
             mapViewRegistry.remove(id)
-            android.util.Log.d("MapLibrePlugin", "[Rooty] Unregistered MapView with ID: $id")
+            mapLibreMapRegistry.remove(id)
+            android.util.Log.d("MapLibrePlugin", "[Rooty] Unregistered MapView and MapLibreMap with ID: $id")
         }
         // ========== End Rooty Fork Addition ==========
     }

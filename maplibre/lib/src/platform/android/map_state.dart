@@ -244,15 +244,15 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
       );
     setStyle(options.initStyle);
 
-    // ========== Rooty Fork Addition: Register MapView for Matrix Sync ==========
-    // Register MapView instance in static registry for cross-plugin access
+    // ========== Rooty Fork Addition: Register MapView and MapLibreMap for Matrix Sync ==========
+    // Register both MapView and MapLibreMap instances in static registry for cross-plugin access
     // Required by rooty_map_engine for Phase 1.2 Native Matrix Sync
     try {
       final mapView = _mapView;
       if (mapView != null) {
         final mapViewId = mapView.hashCode;
 
-        // Call MapLibrePlugin.registerMapView(id, view) via JNI
+        // Call MapLibrePlugin.registerMapView(id, view, map) via JNI
         using((arena) {
           final pluginClass = JClass.forName(
             'com/github/josxha/maplibre/MapLibrePlugin',
@@ -260,13 +260,15 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
 
           final registerMethod = pluginClass.staticMethodId(
             'registerMapView',
-            '(ILorg/maplibre/android/maps/MapView;)V',
+            '(ILorg/maplibre/android/maps/MapView;Lorg/maplibre/android/maps/MapLibreMap;)V',
           );
 
-          // Call static void method with arguments using jni 0.15.x API
+          // Call static void method with both MapView and MapLibreMap
+          // This allows MatrixSyncManager to access MapLibreMap.getCameraPosition()
           registerMethod.call(pluginClass, jvoid.type, [
             mapViewId,
             mapView,
+            jMap,  // Pass MapLibreMap instance
           ]);
         });
 
