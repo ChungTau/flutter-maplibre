@@ -264,7 +264,7 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
           );
 
           // Call static void method with arguments using jni 0.15.x API
-          registerMethod.call(pluginClass, jni.JObject.type, [
+          registerMethod.call(pluginClass, JObject.type, [
             mapViewId,
             mapView,
           ]);
@@ -325,7 +325,7 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
           );
 
           // Call static void method with arguments using jni 0.15.x API
-          unregisterMethod.call(pluginClass, jni.JObject.type, [mapViewId]);
+          unregisterMethod.call(pluginClass, JObject.type, [mapViewId]);
 
           debugPrint('[Rooty] Unregistered MapView with ID: $mapViewId');
         }
