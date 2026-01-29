@@ -247,10 +247,35 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
     // ========== Rooty Fork Addition: Register MapView for Matrix Sync ==========
     // Register MapView instance in static registry for cross-plugin access
     // Required by rooty_map_engine for Phase 1.2 Native Matrix Sync
-    //
-    // NOTE: Using simpler approach - MapView registers itself in native code
-    // when getMapAsync callback fires. No Dart-side JNI calls needed.
-    debugPrint('[Rooty] MapView ID: ${_mapView?.hashCode ?? 0} (auto-registration in native layer)');
+    try {
+      final mapView = _mapView;
+      if (mapView != null) {
+        final mapViewId = mapView.hashCode;
+
+        // Call MapLibrePlugin.registerMapView(id, view) via JNI
+        final pluginClass = jni.JClass.forName(
+          'com/github/josxha/maplibre/MapLibrePlugin',
+        )..releasedBy(arena);
+
+        final registerMethod = pluginClass.staticMethodId(
+          'registerMapView',
+          '(ILorg/maplibre/android/maps/MapView;)V',
+        );
+
+        jni.Jni.env.callStaticVoidMethodA(
+          pluginClass.reference.pointer,
+          registerMethod,
+          jni.JValueArgs([
+            jni.JValueInt(mapViewId),
+            mapView.reference.pointer,
+          ]).toPointer(),
+        );
+
+        debugPrint('[Rooty] Registered MapView with ID: $mapViewId');
+      }
+    } catch (e) {
+      debugPrint('[Rooty] Failed to register MapView: $e');
+    }
     // ========== End Rooty Fork Addition ==========
 
     widget.onEvent?.call(MapEventMapCreated(mapController: this));
@@ -284,9 +309,34 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
     }
 
     // ========== Rooty Fork Addition: Unregister MapView ==========
-    // NOTE: Using simpler approach - MapView unregisters itself in native code
-    // when onDestroy callback fires. No Dart-side JNI calls needed.
-    debugPrint('[Rooty] MapView ID on dispose: ${_mapView?.hashCode ?? 0} (auto-unregistration in native layer)');
+    using((arena) {
+      try {
+        final mapView = _mapView;
+        if (mapView != null) {
+          final mapViewId = mapView.hashCode;
+
+          // Call MapLibrePlugin.unregisterMapView(id) via JNI
+          final pluginClass = jni.JClass.forName(
+            'com/github/josxha/maplibre/MapLibrePlugin',
+          )..releasedBy(arena);
+
+          final unregisterMethod = pluginClass.staticMethodId(
+            'unregisterMapView',
+            '(I)V',
+          );
+
+          jni.Jni.env.callStaticVoidMethodA(
+            pluginClass.reference.pointer,
+            unregisterMethod,
+            jni.JValueArgs([jni.JValueInt(mapViewId)]).toPointer(),
+          );
+
+          debugPrint('[Rooty] Unregistered MapView with ID: $mapViewId');
+        }
+      } catch (e) {
+        debugPrint('[Rooty] Failed to unregister MapView: $e');
+      }
+    });
     // ========== End Rooty Fork Addition ==========
 
     _mapView?.onDestroy();
