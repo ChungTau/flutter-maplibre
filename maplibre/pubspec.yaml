@@ -32,7 +32,8 @@ dependencies:
   geobase: ^1.5.0
   html: ^0.15.4
   jni: ^0.15.2
-  maplibre_ios: ^0.3.3+2
+  maplibre_ios:
+    path: ../maplibre_ios
   pointer_interceptor: ^0.10.1+2
   url_launcher: ^6.3.0
   web: ^1.0.0
