@@ -199,8 +199,8 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
     // ========== Rooty Fork Addition: Cleanup MapView Registry ==========
     deinit {
         // Unregister MapView from MapLibreIosPlugin's static registry
-        MapLibreIosPlugin.unregisterMapView(id: Int(viewId))
-        NSLog("[Rooty] MapViewDelegate: Unregistered MapView for viewId: \(viewId)")
+        MapLibreIosPlugin.unregisterMapView(id: Int(_viewId))
+        NSLog("[Rooty] MapViewDelegate: Unregistered MapView for viewId: \(_viewId)")
     }
     // ========== End Rooty Fork Addition ==========
 
