@@ -535,6 +535,12 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
     // camera = mapCamera;
   });
 
+  @override
+  int? getMapViewId() {
+    // Return MapView's hash code for Matrix Sync integration
+    return _mapView?.hashCode;
+  }
+
   List<RenderedFeature> _nativeQueryToRenderedFeatures(
     JList<jni.Feature?> query,
   ) {

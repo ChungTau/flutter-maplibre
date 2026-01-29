@@ -80,6 +80,16 @@ abstract interface class MapController {
   /// Get the current camera position on the map.
   MapCamera? get camera;
 
+  /// Get the native MapView ID for Matrix Sync integration.
+  ///
+  /// This is used by rooty_map_engine to access the underlying native MapView
+  /// for high-frequency camera state synchronization.
+  ///
+  /// Returns the MapView's hash code, or null if the map is not yet ready.
+  ///
+  /// **Rooty Fork Addition**: This method is added to support Phase 1.2 Matrix Sync.
+  int? getMapViewId();
+
   /// Returns the distance spanned by one logical pixel at the specified
   /// latitude and current zoom level.
   ///

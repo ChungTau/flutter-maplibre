@@ -122,6 +122,12 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
   }
 
   @override
+  int? getMapViewId() {
+    // Return MapView's identity hash code for Matrix Sync integration
+    return identityHashCode(_cachedMapView);
+  }
+
+  @override
   Future<void> moveCamera({
     Geographic? center,
     double? zoom,
