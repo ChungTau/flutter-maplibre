@@ -119,7 +119,7 @@ extension MLNMapView {
                     
                     if let mbglMapPtr = mbglMapPtr {
                         // Use String interpolation instead of NSLog to avoid variadic function issue
-                        let ptrAddress = String(format: "%p", mbglMapPtr)
+                        let ptrAddress = "(mbglMapPtr)"
                         print("[Rooty] MLNMapView+Extension: Successfully extracted mbgl::Map pointer: \(ptrAddress)")
                         return mbglMapPtr
                     } else {
