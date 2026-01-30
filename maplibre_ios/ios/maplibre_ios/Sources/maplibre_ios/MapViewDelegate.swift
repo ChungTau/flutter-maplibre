@@ -69,12 +69,12 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
                 MapLibreIosPlugin.registerMapView(id: Int(viewId), mapView: self._mapView)
                 print("[Rooty] MapViewDelegate: Registered MapView for viewId: \(viewId)")
 
-                // Phase 2.5: Also register by native MapView ID
+                // Phase 2.5: Also register by native MapView pointer address
                 // Required for rooty_map_engine Phase 2.5A Binary GeoJSON optimization
-                // Use ObjectIdentifier to get a stable identity hash that matches Dart's identityHashCode
-                let nativeId = ObjectIdentifier(self._mapView).hashValue
+                // Use pointer address to match Dart FFI's object$.ref.pointer.address
+                let nativeId = Int(bitPattern: Unmanaged.passUnretained(self._mapView).toOpaque())
                 MapLibreRegistry.registerMapViewWithNativeId(nativeId, mapView: self._mapView)
-                print("[Rooty] MapViewDelegate: Registered native MapView ID: \(nativeId)")
+                print("[Rooty] MapViewDelegate: Registered native MapView pointer 0x\(String(nativeId, radix: 16)) (\(nativeId))")
                 // ========== End Rooty Fork Addition ==========
 
                 self._mapView.autoresizingMask = [

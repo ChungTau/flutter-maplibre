@@ -123,15 +123,17 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
 
   @override
   int? getMapViewId() {
-    // Phase 2.5: Return the native MapView hash ID for iOS registry lookup
-    // This matches the ID registered in MapLibreRegistry.registerMapViewWithNativeId()
+    // Phase 2.5: Return the native MapView pointer address for iOS registry lookup
+    // Use pointer address instead of identityHashCode to match Swift-side registration
+    // The pointer address uniquely identifies the actual MLNMapView Swift object
     if (_cachedMapView == null) {
       debugPrint('[Rooty] getMapViewId: MapView not cached yet');
       return null;
     }
-    final nativeId = identityHashCode(_cachedMapView);
-    debugPrint('[Rooty] getMapViewId: Returning native MapView ID $nativeId');
-    return nativeId;
+    // Get the pointer address of the underlying ObjC object
+    final ptrAddress = _cachedMapView!.object$.ref.pointer.address;
+    debugPrint('[Rooty] getMapViewId: Returning native MapView pointer 0x${ptrAddress.toRadixString(16)} ($ptrAddress)');
+    return ptrAddress;
   }
 
   @override
