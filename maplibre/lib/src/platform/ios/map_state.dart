@@ -123,14 +123,15 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
 
   @override
   int? getMapViewId() {
-    // Return the viewId which is used as the key in MapLibre's registry
-    // The iOS plugin will use this to look up the MapView
+    // Phase 2.5: Return the native MapView hash ID for iOS registry lookup
+    // This matches the ID registered in MapLibreRegistry.registerMapViewWithNativeId()
     if (_cachedMapView == null) {
       debugPrint('[Rooty] getMapViewId: MapView not cached yet');
       return null;
     }
-    debugPrint('[Rooty] getMapViewId: Returning viewId $_viewId');
-    return _viewId;
+    final nativeId = identityHashCode(_cachedMapView);
+    debugPrint('[Rooty] getMapViewId: Returning native MapView ID $nativeId');
+    return nativeId;
   }
 
   @override
