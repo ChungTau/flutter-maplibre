@@ -71,7 +71,8 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
 
                 // Phase 2.5: Also register by native MapView ID
                 // Required for rooty_map_engine Phase 2.5A Binary GeoJSON optimization
-                let nativeId = Int(self._mapView.hash)
+                // Use ObjectIdentifier to get a stable identity hash that matches Dart's identityHashCode
+                let nativeId = ObjectIdentifier(self._mapView).hashValue
                 MapLibreRegistry.registerMapViewWithNativeId(nativeId, mapView: self._mapView)
                 print("[Rooty] MapViewDelegate: Registered native MapView ID: \(nativeId)")
                 // ========== End Rooty Fork Addition ==========
