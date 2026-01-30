@@ -47,7 +47,7 @@ public class MapLibreRegistry: NSObject {
         lock.lock()
         defer { lock.unlock() }
         mapViewByNativeId[id] = mapView
-        NSLog("[MapLibreRegistry] Registered native MapView ID: %d → %@", id, mapView)
+        print("[MapLibreRegistry] Registered native MapView ID: \(id) → \(mapView)")
     }
 
     // Phase 2.5: Unregister native MapView ID
@@ -55,7 +55,7 @@ public class MapLibreRegistry: NSObject {
         lock.lock()
         defer { lock.unlock() }
         mapViewByNativeId.removeValue(forKey: id)
-        NSLog("[MapLibreRegistry] Unregistered native MapView ID: %d", id)
+        print("[MapLibreRegistry] Unregistered native MapView ID: \(id)")
     }
 
     // Warning: Storing Activity in a static field may lead to memory leaks.
