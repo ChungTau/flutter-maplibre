@@ -46,6 +46,17 @@ public class MapLibreIosPlugin: NSObject, FlutterPlugin {
         return mapView
     }
 
+    /// Phase 2.5: Get MapView by native ID
+    ///
+    /// This method delegates to MapLibreRegistry which stores MapViews by their native hash ID.
+    /// Required for rooty_map_engine Phase 2.5A Binary GeoJSON optimization.
+    ///
+    /// - Parameter id: The native MapView ID (from mapView.hash)
+    /// - Returns: MLNMapView instance if found, nil otherwise
+    @objc public static func getMapViewWithId(_ id: Int) -> AnyObject? {
+        return MapLibreRegistry.getMapViewWithId(id)
+    }
+
     /// Unregister a MapView instance
     ///
     /// - Parameter id: The MapView identifier (viewId)

@@ -68,6 +68,12 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
                 // Required for rooty_map_engine Phase 1.2 Native Matrix Sync
                 MapLibreIosPlugin.registerMapView(id: Int(viewId), mapView: self._mapView)
                 NSLog("[Rooty] MapViewDelegate: Registered MapView for viewId: \(viewId)")
+
+                // Phase 2.5: Also register by native MapView ID
+                // Required for rooty_map_engine Phase 2.5A Binary GeoJSON optimization
+                let nativeId = Int(self._mapView.hash)
+                MapLibreRegistry.registerMapViewWithNativeId(nativeId, mapView: self._mapView)
+                NSLog("[Rooty] MapViewDelegate: Registered native MapView ID: \(nativeId)")
                 // ========== End Rooty Fork Addition ==========
 
                 self._mapView.autoresizingMask = [
