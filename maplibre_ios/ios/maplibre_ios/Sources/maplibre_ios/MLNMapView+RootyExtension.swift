@@ -61,11 +61,11 @@ extension MLNMapView {
             
             // Use Mirror API to inspect the wrapper object
             let mirror = Mirror(reflecting: mbglMapWrapper)
-            NSLog("[Rooty] MLNMapView+Extension: mbglMap wrapper type: \(type(of: mbglMapWrapper))")
-            NSLog("[Rooty] MLNMapView+Extension: Mirror children count: \(mirror.children.count)")
+            print("[Rooty] MLNMapView+Extension: mbglMap wrapper type: \(type(of: mbglMapWrapper))")
+            print("[Rooty] MLNMapView+Extension: Mirror children count: \(mirror.children.count)")
             
             for (label, value) in mirror.children {
-                NSLog("[Rooty] MLNMapView+Extension: Child - label: \(label ?? "nil"), type: \(type(of: value))")
+                print("[Rooty] MLNMapView+Extension: Child - label: \(label ?? "nil"), type: \(type(of: value))")
             }
             
             // Try to extract pointer using unsafeBitCast
@@ -77,12 +77,12 @@ extension MLNMapView {
         // APPROACH 2: Use Objective-C runtime to get ivar offset
         // This is more reliable for Objective-C objects
         #if DEBUG
-        NSLog("[Rooty] MLNMapView+Extension: Attempting to extract mbgl::Map pointer via runtime introspection")
+        print("[Rooty] MLNMapView+Extension: Attempting to extract mbgl::Map pointer via runtime introspection")
         #endif
         
         var ivarCount: UInt32 = 0
         guard let ivars = class_copyIvarList(type(of: self), &ivarCount) else {
-            NSLog("[Rooty] MLNMapView+Extension: ERROR - Failed to get ivar list")
+            print("[Rooty] MLNMapView+Extension: ERROR - Failed to get ivar list")
             return nil
         }
         
@@ -95,7 +95,7 @@ extension MLNMapView {
                let nameString = String(utf8String: ivarName) {
                 
                 #if DEBUG
-                NSLog("[Rooty] MLNMapView+Extension: Found ivar: \(nameString)")
+                print("[Rooty] MLNMapView+Extension: Found ivar: \(nameString)")
                 #endif
                 
                 // Look for _mbglMap or mbglMap
@@ -103,7 +103,7 @@ extension MLNMapView {
                     let offset = ivar_getOffset(ivar)
                     
                     #if DEBUG
-                    NSLog("[Rooty] MLNMapView+Extension: Found _mbglMap ivar at offset: \(offset)")
+                    print("[Rooty] MLNMapView+Extension: Found _mbglMap ivar at offset: \(offset)")
                     #endif
                     
                     // Get pointer to self
@@ -118,17 +118,19 @@ extension MLNMapView {
                     let mbglMapPtr = mbglMapPtrPtr.pointee
                     
                     if let mbglMapPtr = mbglMapPtr {
-                        NSLog("[Rooty] MLNMapView+Extension: Successfully extracted mbgl::Map pointer: %p", mbglMapPtr)
+                        // Use String interpolation instead of NSLog to avoid variadic function issue
+                        let ptrAddress = String(format: "%p", mbglMapPtr)
+                        print("[Rooty] MLNMapView+Extension: Successfully extracted mbgl::Map pointer: \(ptrAddress)")
                         return mbglMapPtr
                     } else {
-                        NSLog("[Rooty] MLNMapView+Extension: ERROR - mbgl::Map pointer is nil")
+                        print("[Rooty] MLNMapView+Extension: ERROR - mbgl::Map pointer is nil")
                         return nil
                     }
                 }
             }
         }
         
-        NSLog("[Rooty] MLNMapView+Extension: ERROR - _mbglMap ivar not found")
+        print("[Rooty] MLNMapView+Extension: ERROR - _mbglMap ivar not found")
         return nil
     }
 }
