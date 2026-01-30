@@ -33,9 +33,11 @@ public class MapLibreIosPlugin: NSObject, FlutterPlugin {
 
     /// Retrieve a registered MapView by ID
     ///
-    /// - Parameter id: The MapView identifier
+    /// - Parameter id: The MapView identifier (Flutter viewId)
     /// - Returns: The MLNMapView instance, or nil if not found or deallocated
-    @objc public static func getMapView(id: Int) -> MLNMapView? {
+    /// Note: Explicit ObjC selector to avoid conflict with getMapViewByNativeId
+    @objc(getMapViewById:)
+    public static func getMapView(id: Int) -> MLNMapView? {
         registryLock.lock()
         defer { registryLock.unlock() }
 
