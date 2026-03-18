@@ -230,12 +230,25 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
     final features = query.asDart().map(MLNFeature.as);
     return features
         .map(
-          (f) => RenderedFeature(
-            id: f.identifier == null ? null : toDartObject(f.identifier!),
-            properties: f.attributes.toDartMap().map(
-              (k, v) => MapEntry(k.toString(), v),
-            ),
-          ),
+          (f) {
+            // Extract geometry from the GeoJSON dictionary representation
+            Map<String, Object?>? geometry;
+            final geoJsonDict = toDartObject(f.geoJSONDictionary());
+            if (geoJsonDict is Map && geoJsonDict['geometry'] is Map) {
+              final geoMap = geoJsonDict['geometry'] as Map;
+              geometry = geoMap.map(
+                (k, v) => MapEntry(k.toString(), v),
+              );
+            }
+
+            return RenderedFeature(
+              id: f.identifier == null ? null : toDartObject(f.identifier!),
+              properties: f.attributes.toDartMap().map(
+                (k, v) => MapEntry(k.toString(), v),
+              ),
+              geometry: geometry,
+            );
+          },
         )
         .toList(growable: false);
   }

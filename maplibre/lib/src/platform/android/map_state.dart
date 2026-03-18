@@ -547,17 +547,24 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
   ) {
     final features = query.where((f) => f != null).map((f) => f!);
 
-    final gson = jni.Gson();
     return features
         .map(
-          (feature) => RenderedFeature(
-            id: feature.id()?.toDartString(releaseOriginal: true),
-            properties:
-                jsonDecode(
-                      gson.toJson(feature.properties())?.toString() ?? '{}',
-                    )
-                    as Map<String, Object?>,
-          ),
+          (feature) {
+            // Use Feature.toJson() to get the full GeoJSON representation
+            // which includes geometry, properties, and id.
+            final featureJson =
+                feature.toJson()?.toDartString(releaseOriginal: true);
+            if (featureJson == null) {
+              return const RenderedFeature(id: null, properties: {});
+            }
+            final parsed = jsonDecode(featureJson) as Map<String, Object?>;
+            return RenderedFeature(
+              id: parsed['id'],
+              properties:
+                  (parsed['properties'] as Map<String, Object?>?) ?? {},
+              geometry: parsed['geometry'] as Map<String, Object?>?,
+            );
+          },
         )
         .toList(growable: false);
   }
