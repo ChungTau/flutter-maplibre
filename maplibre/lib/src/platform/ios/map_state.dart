@@ -305,11 +305,13 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
   }) {
     final style = this.style;
     if (style == null) {
+      print('[featuresFromSource] style is null');
       return [];
     }
 
     // iOS requires non-empty sourceLayerIds for vector tile sources
     if (sourceLayerIds == null || sourceLayerIds.isEmpty) {
+      print('[featuresFromSource] sourceLayerIds is null/empty');
       return [];
     }
 
@@ -317,10 +319,13 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
       sourceId.toNSString(),
     );
     if (ffiSource == null) {
+      print('[featuresFromSource] source "$sourceId" not found in style');
       return [];
     }
 
-    if (!MLNVectorTileSource.isA(ffiSource)) {
+    final isVector = MLNVectorTileSource.isA(ffiSource);
+    if (!isVector) {
+      print('[featuresFromSource] source "$sourceId" is not MLNVectorTileSource');
       return [];
     }
 
@@ -334,6 +339,7 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
       nsSourceLayerIds,
     );
 
+    print('[featuresFromSource] query returned ${query.count} features');
     return _nativeQueryToRenderedFeatures(query);
   }
 
