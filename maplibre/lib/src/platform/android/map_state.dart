@@ -547,17 +547,24 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
   ) {
     final features = query.where((f) => f != null).map((f) => f!);
 
-    final gson = jni.Gson();
     return features
         .map(
-          (feature) => RenderedFeature(
-            id: feature.id()?.toDartString(releaseOriginal: true),
-            properties:
-                jsonDecode(
-                      gson.toJson(feature.properties())?.toString() ?? '{}',
-                    )
-                    as Map<String, Object?>,
-          ),
+          (feature) {
+            // Use Feature.toJson() to get the full GeoJSON representation
+            // which includes geometry, properties, and id.
+            final featureJson =
+                feature.toJson()?.toDartString(releaseOriginal: true);
+            if (featureJson == null) {
+              return const RenderedFeature(id: null, properties: {});
+            }
+            final parsed = jsonDecode(featureJson) as Map<String, Object?>;
+            return RenderedFeature(
+              id: parsed['id'],
+              properties:
+                  (parsed['properties'] as Map<String, Object?>?) ?? {},
+              geometry: parsed['geometry'] as Map<String, Object?>?,
+            );
+          },
         )
         .toList(growable: false);
   }
@@ -620,6 +627,33 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
           ? JArray.of(JString.nullableType, layerIds.map((s) => s.toJString()))
           : null,
     );
+
+    return _nativeQueryToRenderedFeatures(query);
+  }
+
+  @override
+  List<RenderedFeature> featuresFromSource(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  }) {
+    final style = this.style;
+    if (style == null) {
+      return [];
+    }
+
+    final jSource = style._jStyle.getSourceAs(
+      sourceId.toJString(),
+      T: jni.VectorSource.type,
+    );
+    if (jSource == null) {
+      return [];
+    }
+
+    final jSourceLayerIds = sourceLayerIds != null && sourceLayerIds.isNotEmpty
+        ? JArray.of(JString.type, sourceLayerIds.map((s) => s.toJString()))
+        : JArray(JString.type, 0);
+
+    final query = jSource.querySourceFeatures(jSourceLayerIds, null);
 
     return _nativeQueryToRenderedFeatures(query);
   }

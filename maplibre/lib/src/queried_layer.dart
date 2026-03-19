@@ -8,7 +8,11 @@ import 'package:maplibre/src/map_controller.dart' show MapController;
 @immutable
 class RenderedFeature {
   /// Create a new [RenderedFeature].
-  const RenderedFeature({required this.id, required this.properties});
+  const RenderedFeature({
+    required this.id,
+    required this.properties,
+    this.geometry,
+  });
 
   /// If present, an object uniquely identifying the feature in the vector
   /// source. May be either a string or an integer.
@@ -31,8 +35,18 @@ class RenderedFeature {
   /// The properties of the feature as provided by its source.
   final Map<String, Object?> properties;
 
+  /// The GeoJSON geometry of the feature, if available.
+  ///
+  /// This is a parsed GeoJSON geometry object, e.g.:
+  /// ```json
+  /// {"type": "LineString", "coordinates": [[lng, lat], ...]}
+  /// ```
+  final Map<String, Object?>? geometry;
+
   @override
-  String toString() => 'RenderedFeature(id: $id, properties: $properties)';
+  String toString() =>
+      'RenderedFeature(id: $id, properties: $properties, '
+      'geometry: ${geometry?['type']})';
 
   @override
   bool operator ==(Object other) =>

@@ -230,12 +230,25 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
     final features = query.asDart().map(MLNFeature.as);
     return features
         .map(
-          (f) => RenderedFeature(
-            id: f.identifier == null ? null : toDartObject(f.identifier!),
-            properties: f.attributes.toDartMap().map(
-              (k, v) => MapEntry(k.toString(), v),
-            ),
-          ),
+          (f) {
+            // Extract geometry from the GeoJSON dictionary representation
+            Map<String, Object?>? geometry;
+            final geoJsonDict = toDartObject(f.geoJSONDictionary());
+            if (geoJsonDict is Map && geoJsonDict['geometry'] is Map) {
+              final geoMap = geoJsonDict['geometry'] as Map;
+              geometry = geoMap.map(
+                (k, v) => MapEntry(k.toString(), v),
+              );
+            }
+
+            return RenderedFeature(
+              id: f.identifier == null ? null : toDartObject(f.identifier!),
+              properties: f.attributes.toDartMap().map(
+                (k, v) => MapEntry(k.toString(), v),
+              ),
+              geometry: geometry,
+            );
+          },
         )
         .toList(growable: false);
   }
@@ -280,6 +293,45 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
       inStyleLayersWithIdentifiers: layerIds == null
           ? null
           : NSSet.of(layerIds.map((s) => s.toNSString())),
+    );
+
+    return _nativeQueryToRenderedFeatures(query);
+  }
+
+  @override
+  List<RenderedFeature> featuresFromSource(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  }) {
+    final style = this.style;
+    if (style == null) {
+      return [];
+    }
+
+    // iOS requires non-empty sourceLayerIds for vector tile sources
+    if (sourceLayerIds == null || sourceLayerIds.isEmpty) {
+      return [];
+    }
+
+    final ffiSource = style._ffiStyle.sourceWithIdentifier(
+      sourceId.toNSString(),
+    );
+    if (ffiSource == null) {
+      return [];
+    }
+
+    if (!MLNVectorTileSource.isA(ffiSource)) {
+      return [];
+    }
+
+    final vectorSource = MLNVectorTileSource.as(ffiSource);
+
+    final nsSourceLayerIds = NSSet.of(
+      sourceLayerIds.map((s) => s.toNSString()),
+    );
+
+    final query = vectorSource.featuresInSourceLayersWithIdentifiers(
+      nsSourceLayerIds,
     );
 
     return _nativeQueryToRenderedFeatures(query);
