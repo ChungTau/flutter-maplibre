@@ -463,6 +463,47 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
   }
 
   @override
+  List<RenderedFeature> featuresFromSource(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  }) {
+    if (sourceLayerIds == null || sourceLayerIds.isEmpty) {
+      final features =
+          _map.querySourceFeatures(sourceId, null).toDart;
+      return features
+          .map(
+            (f) => RenderedFeature(
+              id: f.id.dartify(),
+              properties: f.properties.asStringMap() ?? {},
+              geometry: f.geometry?.asStringMap(),
+            ),
+          )
+          .toList(growable: false);
+    }
+
+    // MapLibre GL JS accepts a single sourceLayer string, so loop if multiple
+    final allFeatures = <RenderedFeature>[];
+    for (final sourceLayer in sourceLayerIds) {
+      final features = _map
+          .querySourceFeatures(
+            sourceId,
+            interop.QuerySourceFeaturesOptions(sourceLayer: sourceLayer),
+          )
+          .toDart;
+      allFeatures.addAll(
+        features.map(
+          (f) => RenderedFeature(
+            id: f.id.dartify(),
+            properties: f.properties.asStringMap() ?? {},
+            geometry: f.geometry?.asStringMap(),
+          ),
+        ),
+      );
+    }
+    return allFeatures;
+  }
+
+  @override
   List<QueriedLayer> queryLayers(Offset screenLocation) {
     final features = _map.queryRenderedFeatures(
       screenLocation.toJsPoint(),

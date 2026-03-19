@@ -139,6 +139,16 @@ extension type JsMap._(Camera _) implements Camera {
     JSArray<Point> rect,
     JSAny? options,
   );
+
+  /// Returns an array of GeoJSONFeature objects representing features
+  /// from the specified vector tile source, regardless of whether they
+  /// are rendered by the current style.
+  ///
+  /// https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#querysourcefeatures
+  external JSArray<MapGeoJSONFeature> querySourceFeatures(
+    String sourceId,
+    QuerySourceFeaturesOptions? options,
+  );
 }
 
 /// Anonymous MapOptions for the MapLibre JavaScript [JsMap].
@@ -284,4 +294,14 @@ extension type StyleSwapOptions._(JSObject _) implements JSObject {
 extension type QueryRenderedFeaturesOptions._(JSObject _) implements JSObject {
   /// Create a new JS [MapOptions] object.
   external factory QueryRenderedFeaturesOptions({JSArray<JSString>? layers});
+}
+
+/// QuerySourceFeaturesOptions
+///
+/// https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/QuerySourceFeaturesOptions/
+@anonymous
+@JS()
+extension type QuerySourceFeaturesOptions._(JSObject _) implements JSObject {
+  /// Create a new [QuerySourceFeaturesOptions] object.
+  external factory QuerySourceFeaturesOptions({String? sourceLayer});
 }

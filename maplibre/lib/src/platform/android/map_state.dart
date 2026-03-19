@@ -632,6 +632,33 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
   }
 
   @override
+  List<RenderedFeature> featuresFromSource(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  }) {
+    final style = this.style;
+    if (style == null) {
+      return [];
+    }
+
+    final jSource = style._jStyle.getSourceAs(
+      sourceId.toJString(),
+      T: jni.VectorSource.type,
+    );
+    if (jSource == null) {
+      return [];
+    }
+
+    final jSourceLayerIds = sourceLayerIds != null && sourceLayerIds.isNotEmpty
+        ? JArray.of(JString.type, sourceLayerIds.map((s) => s.toJString()))
+        : JArray(JString.type, 0);
+
+    final query = jSource.querySourceFeatures(jSourceLayerIds, null);
+
+    return _nativeQueryToRenderedFeatures(query);
+  }
+
+  @override
   List<QueriedLayer> queryLayers(Offset screenLocation) => using((arena) {
     if (_jMap == null) {
       throw Exception(

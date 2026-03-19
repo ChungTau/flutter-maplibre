@@ -299,6 +299,45 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
   }
 
   @override
+  List<RenderedFeature> featuresFromSource(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  }) {
+    final style = this.style;
+    if (style == null) {
+      return [];
+    }
+
+    // iOS requires non-empty sourceLayerIds for vector tile sources
+    if (sourceLayerIds == null || sourceLayerIds.isEmpty) {
+      return [];
+    }
+
+    final ffiSource = style._ffiStyle.sourceWithIdentifier(
+      sourceId.toNSString(),
+    );
+    if (ffiSource == null) {
+      return [];
+    }
+
+    if (!MLNVectorTileSource.isA(ffiSource)) {
+      return [];
+    }
+
+    final vectorSource = MLNVectorTileSource.as(ffiSource);
+
+    final nsSourceLayerIds = NSSet.of(
+      sourceLayerIds.map((s) => s.toNSString()),
+    );
+
+    final query = vectorSource.featuresInSourceLayersWithIdentifiers(
+      nsSourceLayerIds,
+    );
+
+    return _nativeQueryToRenderedFeatures(query);
+  }
+
+  @override
   List<QueriedLayer> queryLayers(Offset screenLocation) {
     final style = this.style;
     if (style == null) return [];

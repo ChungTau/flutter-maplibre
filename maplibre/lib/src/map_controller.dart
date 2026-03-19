@@ -139,6 +139,31 @@ abstract interface class MapController {
   // that match all of the filters will be returned.
   List<RenderedFeature> featuresInRect(Rect rect, {List<String>? layerIds});
 
+  /// Returns an array of features from the specified vector tile source that
+  /// are loaded in the map's tile cache, regardless of whether they are
+  /// rendered by any style layer.
+  ///
+  /// Unlike [featuresAtPoint] and [featuresInRect], this method returns
+  /// features from ALL loaded tiles for the source, not just those visible
+  /// on screen. This is useful for querying data that may be filtered out
+  /// by style layers but still present in loaded vector tiles.
+  ///
+  /// [sourceId] is the ID of the vector tile source to query
+  /// (e.g. 'openmaptiles').
+  ///
+  /// [sourceLayerIds] is an optional list of source layer IDs within the
+  /// vector tile source to restrict the query to (e.g. ['transportation']).
+  /// Required on iOS; on Android and Web, passing null queries all layers.
+  ///
+  /// NOTE: Only features from currently loaded tiles are returned. At lower
+  /// zoom levels, tiles contain fewer features.
+  ///
+  /// NOTE: Features may appear duplicated across tile boundaries.
+  List<RenderedFeature> featuresFromSource(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  });
+
   /// Show the user location on the map
   Future<void> enableLocation({
     Duration fastestInterval = const Duration(milliseconds: 750),
