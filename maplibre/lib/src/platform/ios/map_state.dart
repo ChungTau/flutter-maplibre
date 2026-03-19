@@ -305,36 +305,22 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
   }) {
     final style = this.style;
     if (style == null) {
-      print('[featuresFromSource] style is null');
       return [];
     }
 
     // iOS requires non-empty sourceLayerIds for vector tile sources
     if (sourceLayerIds == null || sourceLayerIds.isEmpty) {
-      print('[featuresFromSource] sourceLayerIds is null/empty');
       return [];
     }
-
-    // Debug: list all sources
-    final allSources = style._ffiStyle.sources.allObjects.asDart();
-    final sourceIds = <String>[];
-    for (var i = 0; i < allSources.length; i++) {
-      final src = MLNSource.as(allSources[i]);
-      sourceIds.add(src.identifier.toDartString());
-    }
-    print('[featuresFromSource] Available sources: $sourceIds');
 
     final ffiSource = style._ffiStyle.sourceWithIdentifier(
       sourceId.toNSString(),
     );
     if (ffiSource == null) {
-      print('[featuresFromSource] source "$sourceId" not found in style');
       return [];
     }
 
-    final isVector = MLNVectorTileSource.isA(ffiSource);
-    if (!isVector) {
-      print('[featuresFromSource] source "$sourceId" is not MLNVectorTileSource');
+    if (!MLNVectorTileSource.isA(ffiSource)) {
       return [];
     }
 
@@ -348,7 +334,6 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
       nsSourceLayerIds,
     );
 
-    print('[featuresFromSource] query returned ${query.count} features');
     return _nativeQueryToRenderedFeatures(query);
   }
 
