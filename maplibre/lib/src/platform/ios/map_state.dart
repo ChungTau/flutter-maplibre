@@ -315,6 +315,15 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
       return [];
     }
 
+    // Debug: list all sources
+    final allSources = style._ffiStyle.sources.allObjects.asDart();
+    final sourceIds = <String>[];
+    for (var i = 0; i < allSources.length; i++) {
+      final src = MLNSource.as(allSources[i]);
+      sourceIds.add(src.identifier.toDartString());
+    }
+    print('[featuresFromSource] Available sources: $sourceIds');
+
     final ffiSource = style._ffiStyle.sourceWithIdentifier(
       sourceId.toNSString(),
     );
