@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -14,6 +15,7 @@ import 'package:maplibre/src/platform/android/flutter_api.dart';
 import 'package:maplibre/src/platform/android/functions.dart';
 import 'package:maplibre/src/platform/android/jni.g.dart' as jni;
 import 'package:maplibre/src/platform/android/registry.dart';
+import 'package:maplibre/src/platform/android/rooty_road_serializer.dart';
 import 'package:maplibre/src/platform/map_state_native.dart';
 
 part 'style_controller.dart';
@@ -656,6 +658,31 @@ final class MapLibreMapStateAndroid extends MapLibreMapStateNative
     final query = jSource.querySourceFeatures(jSourceLayerIds, null);
 
     return _nativeQueryToRenderedFeatures(query);
+  }
+
+  @override
+  Uint8List? featuresFromSourceAsBytes(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  }) {
+    final style = this.style;
+    if (style == null) return null;
+
+    final jSource = style._jStyle.getSourceAs(
+      sourceId.toJString(),
+      T: jni.VectorSource.type,
+    );
+    if (jSource == null) return null;
+
+    final jSourceLayerIds = sourceLayerIds != null && sourceLayerIds.isNotEmpty
+        ? JArray.of(JString.type, sourceLayerIds.map((s) => s.toJString()))
+        : JArray(JString.type, 0);
+
+    // Same native query call as featuresFromSource()
+    final query = jSource.querySourceFeatures(jSourceLayerIds, null);
+
+    // Serialize via Kotlin FlatBuffer serializer (single JNI call)
+    return RootyRoadFeatureSerializer.serialize(query);
   }
 
   @override

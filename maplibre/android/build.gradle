@@ -68,6 +68,8 @@ android {
     dependencies {
         // jnigen picks up api dependencies
         api 'org.maplibre.gl:android-sdk:12.3.+'
+        // [Rooty] FlatBuffers runtime for road feature binary serialization
+        implementation 'com.google.flatbuffers:flatbuffers-java:25.2.10'
         testImplementation "org.jetbrains.kotlin:kotlin-test"
         testImplementation "org.mockito:mockito-core:5.21.+"
     }
