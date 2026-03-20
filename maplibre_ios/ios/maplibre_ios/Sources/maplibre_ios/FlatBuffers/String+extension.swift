@@ -73,15 +73,15 @@ extension String: ObjectAPIPacker {
 
   public static func pack(
     _ builder: inout FlatBufferBuilder,
-    obj: inout String?) -> Offset
+    obj: inout String?) -> FBOffset
   {
-    guard var obj = obj else { return Offset() }
+    guard var obj = obj else { return FBOffset() }
     return pack(&builder, obj: &obj)
   }
 
   public static func pack(
     _ builder: inout FlatBufferBuilder,
-    obj: inout String) -> Offset
+    obj: inout String) -> FBOffset
   {
     builder.create(string: obj)
   }

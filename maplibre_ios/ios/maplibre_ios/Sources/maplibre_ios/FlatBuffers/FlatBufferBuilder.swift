@@ -39,7 +39,7 @@ public struct FlatBufferBuilder {
   /// A check if the buffer is being written into by a different table
   private var isNested = false
   /// Dictonary that stores a map of all the strings that were written to the buffer
-  private var stringOffsetMap: [String: Offset] = [:]
+  private var stringOffsetMap: [String: FBOffset] = [:]
   /// A check to see if finish(::) was ever called to retreive data object
   private var finished = false
   /// A check to see if the buffer should serialize Default values
@@ -145,7 +145,7 @@ public struct FlatBufferBuilder {
   /// *NOTE: Never call this function, this is only supposed to be called
   /// by the generated code*
   @inline(__always)
-  mutating public func require(table: Offset, fields: [Int32]) {
+  mutating public func require(table: FBOffset, fields: [Int32]) {
     for index in stride(from: 0, to: fields.count, by: 1) {
       let start = _bb.capacity &- Int(table.o)
       let startTable = start &- Int(_bb.read(def: Int32.self, position: start))
@@ -158,7 +158,7 @@ public struct FlatBufferBuilder {
 
   /// Finished the buffer by adding the file id and then calling finish
   /// - Parameters:
-  ///   - offset: Offset of the table
+  ///   - offset: FBOffset of the table
   ///   - fileId: Takes the fileId
   ///   - prefix: if false it wont add the size of the buffer
   ///
@@ -179,7 +179,7 @@ public struct FlatBufferBuilder {
   /// Whereas, if `addPrefix` is true, the written bytes would
   /// include the size of the current buffer.
   mutating public func finish(
-    offset: Offset,
+    offset: FBOffset,
     fileId: String,
     addPrefix prefix: Bool = false)
   {
@@ -194,7 +194,7 @@ public struct FlatBufferBuilder {
 
   /// Finished the buffer by adding the file id, offset, and prefix to it.
   /// - Parameters:
-  ///   - offset: Offset of the table
+  ///   - offset: FBOffset of the table
   ///   - prefix: if false it wont add the size of the buffer
   ///
   /// ``finish(offset:addPrefix:)`` should be called at the end of creating
@@ -210,7 +210,7 @@ public struct FlatBufferBuilder {
   /// If `addPrefix` is true, the written bytes would
   /// include the size of the current buffer.
   mutating public func finish(
-    offset: Offset,
+    offset: FBOffset,
     addPrefix prefix: Bool = false)
   {
     notNested()
@@ -230,7 +230,7 @@ public struct FlatBufferBuilder {
   ///   .startMonster(&fbb)
   /// ```
   /// - Parameter numOfFields: Number of elements to be written to the buffer
-  /// - Returns: Offset of the newly started table
+  /// - Returns: FBOffset of the newly started table
   @inline(__always)
   mutating public func startTable(with numOfFields: Int) -> UOffset {
     notNested()
@@ -418,12 +418,12 @@ public struct FlatBufferBuilder {
   /// ```
   ///
   /// - Parameter len: Length of the buffer
-  /// - Returns: Returns the current ``Offset`` in the ``ByteBuffer``
+  /// - Returns: Returns the current ``FBOffset`` in the ``ByteBuffer``
   @inline(__always)
-  mutating public func endVector(len: Int) -> Offset {
+  mutating public func endVector(len: Int) -> FBOffset {
     assert(isNested, "Calling endVector without calling startVector")
     isNested = false
-    return Offset(offset: push(element: Int32(len)))
+    return FBOffset(offset: push(element: Int32(len)))
   }
 
   /// Creates a vector of type ``Scalar`` into the ``ByteBuffer``
@@ -439,9 +439,9 @@ public struct FlatBufferBuilder {
   /// The underlying implementation simply calls ``createVector(_:size:)-4lhrv``
   ///
   /// - Parameter elements: elements to be written into the buffer
-  /// - returns: ``Offset`` of the vector
+  /// - returns: ``FBOffset`` of the vector
   @inline(__always)
-  mutating public func createVector<T: Scalar>(_ elements: [T]) -> Offset {
+  mutating public func createVector<T: Scalar>(_ elements: [T]) -> FBOffset {
     createVector(elements, size: elements.count)
   }
 
@@ -457,11 +457,11 @@ public struct FlatBufferBuilder {
   ///
   /// - Parameter elements: Elements to be written into the buffer
   /// - Parameter size: Count of elements
-  /// - returns: ``Offset`` of the vector
+  /// - returns: ``FBOffset`` of the vector
   @inline(__always)
   mutating public func createVector<T: Scalar>(
     _ elements: [T],
-    size: Int) -> Offset
+    size: Int) -> FBOffset
   {
     let size = size
     startVector(size, elementSize: MemoryLayout<T>.size)
@@ -476,8 +476,8 @@ public struct FlatBufferBuilder {
   /// Allows creating a vector from `Data` without copying to a `[UInt8]`
   ///
   /// - Parameter bytes: bytes to be written into the buffer
-  /// - Returns: ``Offset`` of the vector
-  mutating public func createVector(bytes: ContiguousBytes) -> Offset {
+  /// - Returns: ``FBOffset`` of the vector
+  mutating public func createVector(bytes: ContiguousBytes) -> FBOffset {
     let size = bytes.withUnsafeBytes { ptr in ptr.count }
     startVector(size, elementSize: MemoryLayout<UInt8>.size)
     _bb.push(bytes: bytes)
@@ -498,9 +498,9 @@ public struct FlatBufferBuilder {
   /// The underlying implementation simply calls ``createVector(_:size:)-7cx6z``
   ///
   /// - Parameter elements: elements to be written into the buffer
-  /// - returns: ``Offset`` of the vector
+  /// - returns: ``FBOffset`` of the vector
   @inline(__always)
-  mutating public func createVector<T: Enum>(_ elements: [T]) -> Offset {
+  mutating public func createVector<T: Enum>(_ elements: [T]) -> FBOffset {
     createVector(elements, size: elements.count)
   }
 
@@ -516,11 +516,11 @@ public struct FlatBufferBuilder {
   ///
   /// - Parameter elements: Elements to be written into the buffer
   /// - Parameter size: Count of elements
-  /// - returns: ``Offset`` of the vector
+  /// - returns: ``FBOffset`` of the vector
   @inline(__always)
   mutating public func createVector<T: Enum>(
     _ elements: [T],
-    size: Int) -> Offset
+    size: Int) -> FBOffset
   {
     let size = size
     startVector(size, elementSize: T.byteSize)
@@ -532,7 +532,7 @@ public struct FlatBufferBuilder {
 
   /// Creates a vector of already written offsets
   ///
-  /// ``createVector(ofOffsets:)`` creates a vector of ``Offset`` into
+  /// ``createVector(ofOffsets:)`` creates a vector of ``FBOffset`` into
   /// ``ByteBuffer``. This is a convenient method instead of calling,
   /// ``startVector(_:elementSize:)`` and then ``endVector(len:)``.
   ///
@@ -542,16 +542,16 @@ public struct FlatBufferBuilder {
   /// let namesOffsets = builder.
   ///   createVector(ofOffsets: [name1, name2])
   /// ```
-  /// - Parameter offsets: Array of offsets of type ``Offset``
-  /// - returns: ``Offset`` of the vector
+  /// - Parameter offsets: Array of offsets of type ``FBOffset``
+  /// - returns: ``FBOffset`` of the vector
   @inline(__always)
-  mutating public func createVector(ofOffsets offsets: [Offset]) -> Offset {
+  mutating public func createVector(ofOffsets offsets: [FBOffset]) -> FBOffset {
     createVector(ofOffsets: offsets, len: offsets.count)
   }
 
   /// Creates a vector of already written offsets
   ///
-  /// ``createVector(ofOffsets:)`` creates a vector of ``Offset`` into
+  /// ``createVector(ofOffsets:)`` creates a vector of ``FBOffset`` into
   /// ``ByteBuffer``. This is a convenient method instead of calling,
   /// ``startVector(_:elementSize:)`` and then ``endVector(len:)``
   ///
@@ -560,15 +560,15 @@ public struct FlatBufferBuilder {
   ///   createVector(ofOffsets: [name1, name2])
   /// ```
   ///
-  /// - Parameter offsets: Array of offsets of type ``Offset``
+  /// - Parameter offsets: Array of offsets of type ``FBOffset``
   /// - Parameter size: Count of elements
-  /// - returns: ``Offset`` of the vector
+  /// - returns: ``FBOffset`` of the vector
   @inline(__always)
   mutating public func createVector(
-    ofOffsets offsets: [Offset],
-    len: Int) -> Offset
+    ofOffsets offsets: [FBOffset],
+    len: Int) -> FBOffset
   {
-    startVector(len, elementSize: MemoryLayout<Offset>.size)
+    startVector(len, elementSize: MemoryLayout<FBOffset>.size)
     for index in stride(from: offsets.count, to: 0, by: -1) {
       push(element: offsets[index &- 1])
     }
@@ -589,10 +589,10 @@ public struct FlatBufferBuilder {
   /// ```
   ///
   /// - Parameter str: Array of string
-  /// - returns: ``Offset`` of the vector
+  /// - returns: ``FBOffset`` of the vector
   @inline(__always)
-  mutating public func createVector(ofStrings str: [String]) -> Offset {
-    var offsets: [Offset] = []
+  mutating public func createVector(ofStrings str: [String]) -> FBOffset {
+    var offsets: [FBOffset] = []
     for index in stride(from: 0, to: str.count, by: 1) {
       offsets.append(create(string: str[index]))
     }
@@ -611,10 +611,10 @@ public struct FlatBufferBuilder {
   /// ```
   ///
   /// - Parameter structs: A vector of ``NativeStruct``
-  /// - Returns: ``Offset`` of the vector
+  /// - Returns: ``FBOffset`` of the vector
   @inline(__always)
   mutating public func createVector<T: NativeStruct>(ofStructs structs: [T])
-    -> Offset
+    -> FBOffset
   {
     startVector(
       structs.count * MemoryLayout<T>.size,
@@ -639,11 +639,11 @@ public struct FlatBufferBuilder {
   /// - Parameters:
   ///   - s: ``NativeStruct`` to be inserted into the ``ByteBuffer``
   ///   - position: The  predefined position of the object
-  /// - Returns: ``Offset`` of written struct
+  /// - Returns: ``FBOffset`` of written struct
   @inline(__always)
   @discardableResult
   mutating public func create<T: NativeStruct>(
-    struct s: T, position: VOffset) -> Offset
+    struct s: T, position: VOffset) -> FBOffset
   {
     let offset = create(struct: s)
     _vtableStorage.add(
@@ -664,16 +664,16 @@ public struct FlatBufferBuilder {
   ///
   /// - Parameters:
   ///   - s: ``NativeStruct`` to be inserted into the ``ByteBuffer``
-  /// - Returns: ``Offset`` of written struct
+  /// - Returns: ``FBOffset`` of written struct
   @inline(__always)
   @discardableResult
   mutating public func create<T: NativeStruct>(
-    struct s: T) -> Offset
+    struct s: T) -> FBOffset
   {
     let size = MemoryLayout<T>.size
     preAlign(len: size, alignment: MemoryLayout<T>.alignment)
     _bb.push(struct: s, size: size)
-    return Offset(offset: _bb.size)
+    return FBOffset(offset: _bb.size)
   }
 
   // MARK: - Inserting Strings
@@ -689,17 +689,17 @@ public struct FlatBufferBuilder {
   /// ```
   ///
   /// - Parameter str: String to be serialized
-  /// - returns: ``Offset`` of inserted string
+  /// - returns: ``FBOffset`` of inserted string
   @inline(__always)
-  mutating public func create(string str: String?) -> Offset {
-    guard let str = str else { return Offset() }
+  mutating public func create(string str: String?) -> FBOffset {
+    guard let str = str else { return FBOffset() }
     let len = str.utf8.count
     notNested()
     preAlign(len: len &+ 1, type: UOffset.self)
     _bb.fill(padding: 1)
     _bb.push(string: str, len: len)
     push(element: UOffset(len))
-    return Offset(offset: _bb.size)
+    return FBOffset(offset: _bb.size)
   }
 
   /// Insets a shared string into the buffer of type `UTF8`
@@ -720,10 +720,10 @@ public struct FlatBufferBuilder {
   /// ```
   ///
   /// - Parameter str: String to be serialized
-  /// - returns: ``Offset`` of inserted string
+  /// - returns: ``FBOffset`` of inserted string
   @inline(__always)
-  mutating public func createShared(string str: String?) -> Offset {
-    guard let str = str else { return Offset() }
+  mutating public func createShared(string str: String?) -> FBOffset {
+    guard let str = str else { return FBOffset() }
     if let offset = stringOffsetMap[str] {
       return offset
     }
@@ -734,26 +734,26 @@ public struct FlatBufferBuilder {
 
   // MARK: - Inseting offsets
 
-  /// Writes the ``Offset`` of an already written table
+  /// Writes the ``FBOffset`` of an already written table
   ///
-  /// Writes the ``Offset`` of a table if not empty into the
+  /// Writes the ``FBOffset`` of a table if not empty into the
   /// ``ByteBuffer``
   ///
   /// - Parameters:
-  ///   - offset: ``Offset`` of another object to be written
+  ///   - offset: ``FBOffset`` of another object to be written
   ///   - position: The predefined position of the object
   @inline(__always)
-  mutating public func add(offset: Offset, at position: VOffset) {
+  mutating public func add(offset: FBOffset, at position: VOffset) {
     if offset.isEmpty { return }
     add(element: refer(to: offset.o), def: 0, at: position)
   }
 
-  /// Pushes a value of type ``Offset`` into the ``ByteBuffer``
-  /// - Parameter o: ``Offset``
-  /// - returns: Current position of the ``Offset``
+  /// Pushes a value of type ``FBOffset`` into the ``ByteBuffer``
+  /// - Parameter o: ``FBOffset``
+  /// - returns: Current position of the ``FBOffset``
   @inline(__always)
   @discardableResult
-  mutating public func push(element o: Offset) -> UOffset {
+  mutating public func push(element o: FBOffset) -> UOffset {
     push(element: refer(to: o.o))
   }
 

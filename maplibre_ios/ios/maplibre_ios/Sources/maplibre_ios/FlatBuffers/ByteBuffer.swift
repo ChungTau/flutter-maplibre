@@ -309,7 +309,7 @@ public struct ByteBuffer {
   /// Adds an object of type Scalar into the buffer
   /// - Parameters:
   ///   - value: Object  that will be written to the buffer
-  ///   - len: Offset to subtract from the WriterIndex
+  ///   - len: FBOffset to subtract from the WriterIndex
   @inline(__always)
   @usableFromInline
   mutating func push<T: Scalar>(value: T, len: Int) {

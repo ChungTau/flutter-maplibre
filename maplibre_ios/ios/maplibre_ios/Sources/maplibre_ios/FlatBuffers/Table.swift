@@ -62,7 +62,7 @@ public struct Table {
   }
 
   /// String reads from the buffer with respect to position of the current table.
-  /// - Parameter offset: Offset of the string
+  /// - Parameter offset: FBOffset of the string
   public func string(at offset: Int32) -> String? {
     directString(at: offset + position)
   }
@@ -70,7 +70,7 @@ public struct Table {
   /// Direct string reads from the buffer disregarding the position of the table.
   /// It would be preferable to use string unless the current position of the table
   /// is not needed
-  /// - Parameter offset: Offset of the string
+  /// - Parameter offset: FBOffset of the string
   public func directString(at offset: Int32) -> String? {
     var offset = offset
     offset += bb.read(def: Int32.self, position: Int(offset))
@@ -82,7 +82,7 @@ public struct Table {
   /// Reads from the buffer with respect to the position in the table.
   /// - Parameters:
   ///   - type: Type of Element that needs to be read from the buffer
-  ///   - o: Offset of the Element
+  ///   - o: FBOffset of the Element
   public func readBuffer<T>(of type: T.Type, at o: Int32) -> T {
     directRead(of: T.self, offset: o + position)
   }
@@ -99,7 +99,7 @@ public struct Table {
   ///   ```
   /// - Parameters:
   ///   - type: Type of Element that needs to be read from the buffer
-  ///   - o: Offset of the Element
+  ///   - o: FBOffset of the Element
   public func directRead<T>(of type: T.Type, offset o: Int32) -> T {
     let r = bb.read(def: T.self, position: Int(o))
     return r
@@ -159,7 +159,7 @@ public struct Table {
     o + fbb.read(def: Int32.self, position: Int(o))
   }
 
-  /// Gets a vtable value according to an table Offset and a field offset
+  /// Gets a vtable value according to an table FBOffset and a field offset
   /// - Parameters:
   ///   - o: offset relative to entire buffer
   ///   - vOffset: Field offset within a vtable
@@ -209,7 +209,7 @@ public struct Table {
 
   /// Compares two objects at offset A and array of `Bytes` within a ByteBuffer
   /// - Parameters:
-  ///   - off1: Offset to compare to
+  ///   - off1: FBOffset to compare to
   ///   - key: bytes array to compare to
   ///   - fbb: Bytebuffer
   /// - Returns: returns the difference between

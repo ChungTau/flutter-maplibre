@@ -73,22 +73,22 @@ public struct rooty_road_RoadFeature: FlatBufferObject, Verifiable {
   public var refId: String? { let o = _accessor.offset(VTOFFSET.refId.v); return o == 0 ? nil : _accessor.string(at: o) }
   public var refIdSegmentArray: [UInt8]? { return _accessor.getVector(at: VTOFFSET.refId.v) }
   public static func startRoadFeature(_ fbb: inout FlatBufferBuilder) -> UOffset { fbb.startTable(with: 6) }
-  public static func addVectorOf(coordinates: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: coordinates, at: VTOFFSET.coordinates.p) }
+  public static func addVectorOf(coordinates: FBOffset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: coordinates, at: VTOFFSET.coordinates.p) }
   public static func add(roadClass: rooty_road_RoadClass, _ fbb: inout FlatBufferBuilder) { fbb.add(element: roadClass.rawValue, def: 0, at: VTOFFSET.roadClass.p) }
   public static func add(structureType: rooty_road_StructureType, _ fbb: inout FlatBufferBuilder) { fbb.add(element: structureType.rawValue, def: 0, at: VTOFFSET.structureType.p) }
   public static func add(zLevel: Int8, _ fbb: inout FlatBufferBuilder) { fbb.add(element: zLevel, def: 0, at: VTOFFSET.zLevel.p) }
   public static func add(osmId: UInt64, _ fbb: inout FlatBufferBuilder) { fbb.add(element: osmId, def: 0, at: VTOFFSET.osmId.p) }
-  public static func add(refId: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: refId, at: VTOFFSET.refId.p) }
-  public static func endRoadFeature(_ fbb: inout FlatBufferBuilder, start: UOffset) -> Offset { let end = Offset(offset: fbb.endTable(at: start)); return end }
+  public static func add(refId: FBOffset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: refId, at: VTOFFSET.refId.p) }
+  public static func endRoadFeature(_ fbb: inout FlatBufferBuilder, start: UOffset) -> FBOffset { let end = FBOffset(offset: fbb.endTable(at: start)); return end }
   public static func createRoadFeature(
     _ fbb: inout FlatBufferBuilder,
-    coordinatesVectorOffset coordinates: Offset = Offset(),
+    coordinatesVectorOffset coordinates: FBOffset = FBOffset(),
     roadClass: rooty_road_RoadClass = .unknown,
     structureType: rooty_road_StructureType = .road,
     zLevel: Int8 = 0,
     osmId: UInt64 = 0,
-    refIdOffset refId: Offset = Offset()
-  ) -> Offset {
+    refIdOffset refId: FBOffset = FBOffset()
+  ) -> FBOffset {
     let __start = rooty_road_RoadFeature.startRoadFeature(&fbb)
     rooty_road_RoadFeature.addVectorOf(coordinates: coordinates, &fbb)
     rooty_road_RoadFeature.add(roadClass: roadClass, &fbb)
@@ -130,12 +130,12 @@ public struct rooty_road_RoadFeaturePack: FlatBufferObject, Verifiable {
   public var featuresCount: Int32 { let o = _accessor.offset(VTOFFSET.features.v); return o == 0 ? 0 : _accessor.vector(count: o) }
   public func features(at index: Int32) -> rooty_road_RoadFeature? { let o = _accessor.offset(VTOFFSET.features.v); return o == 0 ? nil : rooty_road_RoadFeature(_accessor.bb, o: _accessor.indirect(_accessor.vector(at: o) + index * 4)) }
   public static func startRoadFeaturePack(_ fbb: inout FlatBufferBuilder) -> UOffset { fbb.startTable(with: 1) }
-  public static func addVectorOf(features: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: features, at: VTOFFSET.features.p) }
-  public static func endRoadFeaturePack(_ fbb: inout FlatBufferBuilder, start: UOffset) -> Offset { let end = Offset(offset: fbb.endTable(at: start)); return end }
+  public static func addVectorOf(features: FBOffset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: features, at: VTOFFSET.features.p) }
+  public static func endRoadFeaturePack(_ fbb: inout FlatBufferBuilder, start: UOffset) -> FBOffset { let end = FBOffset(offset: fbb.endTable(at: start)); return end }
   public static func createRoadFeaturePack(
     _ fbb: inout FlatBufferBuilder,
-    featuresVectorOffset features: Offset = Offset()
-  ) -> Offset {
+    featuresVectorOffset features: FBOffset = FBOffset()
+  ) -> FBOffset {
     let __start = rooty_road_RoadFeaturePack.startRoadFeaturePack(&fbb)
     rooty_road_RoadFeaturePack.addVectorOf(features: features, &fbb)
     return rooty_road_RoadFeaturePack.endRoadFeaturePack(&fbb, start: __start)

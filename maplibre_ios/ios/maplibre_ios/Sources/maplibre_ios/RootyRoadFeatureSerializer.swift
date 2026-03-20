@@ -25,7 +25,7 @@ public class RootyRoadFeatureSerializer: NSObject {
     /// - Returns: NSData containing FlatBuffer-encoded RoadFeaturePack
     @objc public static func serialize(_ features: NSArray) -> NSData {
         var builder = FlatBufferBuilder(initialSize: 1024 * 256)
-        var featureOffsets: [Offset] = []
+        var featureOffsets: [FBOffset] = []
 
         for obj in features {
             guard let feature = obj as? (any MLNFeature) else { continue }
@@ -84,7 +84,7 @@ public class RootyRoadFeatureSerializer: NSObject {
                 structureType: structureType,
                 zLevel: zLevel,
                 osmId: osmId,
-                refIdOffset: refIdOffset ?? Offset()
+                refIdOffset: refIdOffset ?? FBOffset()
             )
             featureOffsets.append(featureOffset)
         }
