@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,7 @@ import 'package:maplibre/src/platform/map_state_native.dart';
 import 'package:maplibre/src/platform/pigeon.g.dart' as pigeon;
 import 'package:maplibre_ios/maplibre_ffi.g.dart';
 import 'package:maplibre_ios/objective_c.dart';
+import 'package:maplibre_ios/rooty_road_serializer.dart';
 
 part 'style_controller.dart';
 
@@ -335,6 +337,38 @@ final class MapLibreMapStateIos extends MapLibreMapStateNative
     );
 
     return _nativeQueryToRenderedFeatures(query);
+  }
+
+  @override
+  Uint8List? featuresFromSourceAsBytes(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  }) {
+    final style = this.style;
+    if (style == null) return null;
+
+    if (sourceLayerIds == null || sourceLayerIds.isEmpty) return null;
+
+    final ffiSource = style._ffiStyle.sourceWithIdentifier(
+      sourceId.toNSString(),
+    );
+    if (ffiSource == null) return null;
+
+    if (!MLNVectorTileSource.isA(ffiSource)) return null;
+
+    final vectorSource = MLNVectorTileSource.as(ffiSource);
+    final nsSourceLayerIds = NSSet.of(
+      sourceLayerIds.map((s) => s.toNSString()),
+    );
+
+    // Query features (same native call as featuresFromSource)
+    final query = vectorSource.featuresInSourceLayersWithIdentifiers(
+      nsSourceLayerIds,
+    );
+
+    // Serialize to FlatBuffer bytes via native Swift serializer
+    // (bypasses Dart RenderedFeature object creation entirely)
+    return RootyRoadFeatureSerializer.serialize(query);
   }
 
   @override

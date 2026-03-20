@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 import 'package:maplibre/maplibre.dart';
 import 'package:maplibre/src/inherited_model.dart';
@@ -163,6 +165,20 @@ abstract interface class MapController {
     String sourceId, {
     List<String>? sourceLayerIds,
   });
+
+  /// [Rooty] Returns road features from a vector tile source as
+  /// FlatBuffer-encoded bytes for zero-copy deserialization in Rust.
+  ///
+  /// This bypasses Dart object allocation entirely — native code serializes
+  /// MLNFeature data directly into a FlatBuffer byte array.
+  ///
+  /// Returns null on platforms that don't support this (Android, Web),
+  /// or if no features are available.
+  Uint8List? featuresFromSourceAsBytes(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  }) =>
+      null; // Default: not supported. iOS overrides this.
 
   /// Show the user location on the map
   Future<void> enableLocation({

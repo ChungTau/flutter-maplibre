@@ -22,11 +22,19 @@ fi
 echo "✅ Using Flutter framework at: $FLUTTER_FRAMEWORK_PATH"
 echo "✅ Using iOS SDK at: $SDK_PATH"
 
+# --- Collect FlatBuffers + Generated sources (for RootyRoadFeatureSerializer) ---
+FB_SOURCES=()
+for f in FlatBuffers/*.swift Generated/*.swift; do
+  [ -f "$f" ] && FB_SOURCES+=("-c" "$f")
+done
+
 # --- Compile Swift sources and emit Objective-C headers ---
 swiftc \
   -c MapLibreRegistry.swift \
   -c Extensions.swift \
   -c Helpers.swift \
+  -c RootyRoadFeatureSerializer.swift \
+  "${FB_SOURCES[@]}" \
   -module-name maplibre_ios \
   -emit-objc-header-path MapLibreIos.h \
   -emit-library -o libmaplibreios.dylib \
