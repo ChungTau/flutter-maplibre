@@ -44,7 +44,7 @@ class RootyRoadFeatureSerializer {
   /// Returns null if serialization fails or produces empty data.
   static Uint8List? serialize(objc.NSArray features) {
     final retPtr = _msgSend(
-      _class.ref.pointer,
+      _class,
       _sel,
       features.ref.pointer,
     );

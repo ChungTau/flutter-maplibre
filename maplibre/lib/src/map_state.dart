@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 import 'package:maplibre/maplibre.dart';
 import 'package:maplibre/src/inherited_model.dart';
@@ -42,6 +44,13 @@ abstract class MapLibreMapState extends State<MapLibreMap>
       ],
     );
   }
+
+  @override
+  Uint8List? featuresFromSourceAsBytes(
+    String sourceId, {
+    List<String>? sourceLayerIds,
+  }) =>
+      null;
 
   /// Build the platform specific widget.
   Widget buildPlatformWidget(BuildContext context);
