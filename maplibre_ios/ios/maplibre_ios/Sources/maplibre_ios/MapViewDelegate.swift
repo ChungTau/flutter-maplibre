@@ -251,6 +251,12 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
         _flutterApi.onStyleLoaded { _ in }
     }
 
+    // MLNMapViewDelegate method called when the map has finished loading all
+    // tiles and resources needed for the current viewport.
+    func mapViewDidFinishLoadingMap(_: MLNMapView) {
+        _flutterApi.onIdle { _ in }
+    }
+
     func mapView(_: MLNMapView, regionDidChangeAnimated _: Bool) {
         onCameraMoved()
     }
